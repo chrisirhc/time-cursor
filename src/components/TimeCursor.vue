@@ -15,10 +15,12 @@ onMounted(() => {
     // Find the cursor position, and append times to line ends.
     if (selectionStart) {
       const textValue = text.value!;
-      const textBefore = textValue.substring(0, selectionStart);
-      const textAfter = textValue.substring(selectionStart);
+      const lineEndingAfter = textValue.indexOf('\n', selectionStart);
+      const insertPosition = lineEndingAfter === -1 ? textValue.length : lineEndingAfter;
+      const textBefore = textValue.substring(0, insertPosition);
+      const textAfter = textValue.substring(insertPosition);
 
-      text.value = textBefore + new Date().toLocaleTimeString() + textAfter;
+      text.value = textBefore + ' ' + new Date().toLocaleTimeString() + textAfter;
       lastSelection = selectionStart;
     }
   }, 1000)
