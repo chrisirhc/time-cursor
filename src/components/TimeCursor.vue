@@ -16,11 +16,25 @@ onMounted(() => {
     if (selectionStart) {
       const textValue = text.value!;
       const lineEndingAfter = textValue.indexOf('\n', selectionStart);
-      const insertPosition = lineEndingAfter === -1 ? textValue.length : lineEndingAfter;
-      const textBefore = textValue.substring(0, insertPosition);
-      const textAfter = textValue.substring(insertPosition);
+      const searchEnd = lineEndingAfter === -1 ? textValue.length : lineEndingAfter;
 
-      text.value = textBefore + ' ' + new Date().toLocaleTimeString() + textAfter;
+      const searchString = textValue.substring(selectionStart, searchEnd);
+      const timeStringStart = searchString.indexOf(' [T');
+      if (timeStringStart !== -1) {
+        const timeStringEnd = searchString.indexOf(']', timeStringStart) + 1;
+        const textBefore = textValue.substring(0, selectionStart + timeStringStart);
+        const textAfter = textValue.substring(selectionStart + timeStringEnd);
+        const timeString = '[T' + new Date().toLocaleTimeString() + ']';
+        text.value = textBefore + ' ' + timeString + textAfter;
+        lastSelection = selectionStart;
+        return;
+      }
+
+      const textBefore = textValue.substring(0, searchEnd);
+      const textAfter = textValue.substring(searchEnd);
+
+      const timeString = '[T' + new Date().toLocaleTimeString() + ']';
+      text.value = textBefore + ' ' + timeString + textAfter;
       lastSelection = selectionStart;
     }
   }, 1000)
