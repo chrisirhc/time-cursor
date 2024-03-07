@@ -20,11 +20,16 @@ onMounted(() => {
 
       const searchString = textValue.substring(selectionStart, searchEnd);
       const timeStringStart = searchString.indexOf(' [T');
+      const currentTime = new Date().toLocaleTimeString();
       if (timeStringStart !== -1) {
         const timeStringEnd = searchString.indexOf(']', timeStringStart) + 1;
         const textBefore = textValue.substring(0, selectionStart + timeStringStart);
         const textAfter = textValue.substring(selectionStart + timeStringEnd);
-        const timeString = '[T' + new Date().toLocaleTimeString() + ']';
+
+        const prevTimeString = searchString.substring(timeStringStart, timeStringEnd);
+        const prevStartTime = prevTimeString.substring(3, 11);
+
+        const timeString = `[T${prevStartTime}–${currentTime}]`;
         text.value = textBefore + ' ' + timeString + textAfter;
         lastSelection = selectionStart;
         return;
