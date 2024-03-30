@@ -10,7 +10,14 @@ let intervalId: number;
 
 onMounted(() => {
   intervalId = setInterval(() => {
+    if (pressedKeys.size || keyPressedRecentlyTimer !== null) {
+      return;
+    }
     const inputElement = input.value!;
+
+    if (inputElement.selectionStart !== inputElement.selectionEnd) {
+      return;
+    }
     const selectionStart = inputElement.selectionStart;
     // Find the cursor position, and append times to line ends.
     if (selectionStart) {
@@ -56,10 +63,44 @@ onUnmounted(() => {
   clearInterval(intervalId);
 });
 
+// We don't want to interrupt the user's flow while they're typing.
+// If key was pressed recently, skip the changes to the text.
+let keyPressedRecentlyTimer: number | null = null;
+let pressedKeys = new Set<string>();
+
+function handleKeyDown(event: KeyboardEvent) {
+  pressedKeys.add(event.code);
+  console.log('pressedKeys', pressedKeys)
+  if (keyPressedRecentlyTimer) {
+    clearTimeout(keyPressedRecentlyTimer);
+    keyPressedRecentlyTimer = null;
+  }
+}
+
+function handleKeyUp(event: KeyboardEvent) {
+  pressedKeys.delete(event.code);
+  if (pressedKeys.size !== 0) {
+    return;
+  }
+  console.log('pressedKeys up', pressedKeys)
+  if (keyPressedRecentlyTimer) {
+    clearTimeout(keyPressedRecentlyTimer);
+  }
+  const _keyPressedRecentlyTimer = setTimeout(() => {
+    if (keyPressedRecentlyTimer == _keyPressedRecentlyTimer) {
+      keyPressedRecentlyTimer = null;
+    }
+  })
+  keyPressedRecentlyTimer = _keyPressedRecentlyTimer;
+}
+
 </script>
 
 <template>
-  <textarea ref="input" v-model="text"></textarea>
+  <textarea ref="input" v-model="text"
+    @keydown="handleKeyDown"
+    @keyup="handleKeyUp"
+    ></textarea>
 </template>
 
 <style scoped>
